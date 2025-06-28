@@ -52,10 +52,10 @@ MIDDLEWARE = [
 ]
 
 GRAPHENE = {
-    "SCHEMA": "alx-backend-graphql_crm.schema.schema"
+    "SCHEMA": "graphql_crm.schema.schema"
 }
 
-ROOT_URLCONF = 'alx-backend-graphql_crm.urls'
+ROOT_URLCONF = 'graphql_crm.urls'
 
 TEMPLATES = [
     {
@@ -72,7 +72,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'alx-backend-graphql_crm.wsgi.application'
+WSGI_APPLICATION = 'graphql_crm.wsgi.application'
 
 
 # Database
