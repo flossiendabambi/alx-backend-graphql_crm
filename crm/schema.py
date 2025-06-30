@@ -6,6 +6,9 @@ from django.db import transaction
 from graphql import GraphQLError
 from decimal import Decimal
 from datetime import datetime
+from graphene_django.filter import DjangoFilterConnectionField
+from .filters import CustomerFilter, ProductFilter, OrderFilter
+from graphene import relay
 
 # GraphQL types
 class CustomerType(DjangoObjectType):
@@ -151,3 +154,26 @@ class Query(graphene.ObjectType):
 
     def resolve_orders(self, info):
         return Order.objects.all()
+
+class CustomerNode(DjangoObjectType):
+    class Meta:
+        model = Customer
+        interfaces = (relay.Node, )
+        filterset_class = CustomerFilter
+
+class ProductNode(DjangoObjectType):
+    class Meta:
+        model = Product
+        interfaces = (relay.Node, )
+        filterset_class = ProductFilter
+
+class OrderNode(DjangoObjectType):
+    class Meta:
+        model = Order
+        interfaces = (relay.Node, )
+        filterset_class = OrderFilter
+
+class Query(graphene.ObjectType):
+    all_customers = DjangoFilterConnectionField(CustomerNode)
+    all_products = DjangoFilterConnectionField(ProductNode)
+    all_orders = DjangoFilterConnectionField(OrderNode)
