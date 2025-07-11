@@ -3,18 +3,20 @@
 # Get the directory of this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Change to project root (one level above crm/)
-cd "$SCRIPT_DIR/.."
+# Change to the project root (assumes script is in crm/cron_jobs)
+cd "$SCRIPT_DIR/../.."
 
-# Check if we are in the correct directory
-CWD=$(pwd)
-if [[ "$CWD" == *"/crm" ]]; then
-	    cd ..
+# Store the current working directory
+cwd=$(pwd)
+
+# Confirm we're in the expected location
+if [[ "$cwd" == *"/alx-backend-graphql_crm" ]]; then
+	    echo "Running cleanup script in $cwd"
     else
-	        echo "Unexpected working directory: $CWD"
+	        echo "Unexpected cwd: $cwd"
 fi
 
-# Run cleanup using manage.py shell
+# Run the Django shell command to clean inactive customers
 DELETED_COUNT=$(python3 manage.py shell <<EOF
 from datetime import timedelta
 from django.utils import timezone
@@ -28,10 +30,10 @@ print(count)
 EOF
 )
 
-# Log result
+# Log result to /tmp file
 if [[ "$DELETED_COUNT" -gt 0 ]]; then
 	    echo "$(date '+%Y-%m-%d %H:%M:%S') - Deleted $DELETED_COUNT inactive customers" >> /tmp/customer_cleanup_log.txt
     else
-	        echo "$(date '+%Y-%m-%d %H:%M:%S') - No inactive customers found" >> /tmp/customer_cleanup_log.txt
+	        echo "$(date '+%Y-%m-%d %H:%M:%S') - No inactive customers to delete" >> /tmp/customer_cleanup_log.txt
 fi
 
