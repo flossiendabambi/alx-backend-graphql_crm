@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from crm.settings_cron import CRONJOBS
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,10 +44,6 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS += ['django_crontab']
-
-CRONJOBS = [
-    ('*/5 * * * *', 'crm.cron.log_crm_heartbeat'),
-]
 
 
 MIDDLEWARE = [
