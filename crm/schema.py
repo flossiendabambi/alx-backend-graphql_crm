@@ -134,7 +134,7 @@ class CreateOrder(graphene.Mutation):
 
 
 # Add to mutation root
-class Mutation(graphene.ObjectType):
+class Mutation(StockMutation, graphene.ObjectType):
     create_customer = CreateCustomer.Field()
     bulk_create_customers = BulkCreateCustomers.Field()
     create_product = CreateProduct.Field()
@@ -177,3 +177,35 @@ class Query(graphene.ObjectType):
     all_customers = DjangoFilterConnectionField(CustomerNode)
     all_products = DjangoFilterConnectionField(ProductNode)
     all_orders = DjangoFilterConnectionField(OrderNode)
+    
+import graphene
+from graphene_django import DjangoObjectType
+from crm.models import Product  # adjust if your model path differs
+
+class ProductType(DjangoObjectType):
+    class Meta:
+        model = Product
+        fields = ("id", "name", "stock")
+
+class UpdateLowStockProducts(graphene.Mutation):
+    class Arguments:
+        pass  # no input arguments
+
+    updated_products = graphene.List(ProductType)
+    message = graphene.String()
+
+    def mutate(self, info):
+        low_stock_products = Product.objects.filter(stock__lt=10)
+        updated = []
+        for product in low_stock_products:
+            product.stock += 10
+            product.save()
+            updated.append(product)
+
+        return UpdateLowStockProducts(
+            updated_products=updated,
+            message=f"{len(updated)} product(s) restocked."
+        )
+
+class StockMutation(graphene.ObjectType):
+    update_low_stock_products = UpdateLowStockProducts.Field()
