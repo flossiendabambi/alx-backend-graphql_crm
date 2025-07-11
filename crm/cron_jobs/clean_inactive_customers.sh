@@ -1,8 +1,20 @@
 #!/bin/bash
 
-LOG_FILE="/tmp/customer_cleanup_log.txt"
-TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
+# Get the directory of this script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Change to project root (one level above crm/)
+cd "$SCRIPT_DIR/.."
+
+# Check if we are in the correct directory
+CWD=$(pwd)
+if [[ "$CWD" == *"/crm" ]]; then
+	    cd ..
+    else
+	        echo "Unexpected working directory: $CWD"
+fi
+
+# Run cleanup using manage.py shell
 DELETED_COUNT=$(python3 manage.py shell <<EOF
 from datetime import timedelta
 from django.utils import timezone
@@ -16,4 +28,10 @@ print(count)
 EOF
 )
 
-echo "$TIMESTAMP - Deleted $DELETED_COUNT inactive customers" >> "$LOG_FILE"
+# Log result
+if [[ "$DELETED_COUNT" -gt 0 ]]; then
+	    echo "$(date '+%Y-%m-%d %H:%M:%S') - Deleted $DELETED_COUNT inactive customers" >> /tmp/customer_cleanup_log.txt
+    else
+	        echo "$(date '+%Y-%m-%d %H:%M:%S') - No inactive customers found" >> /tmp/customer_cleanup_log.txt
+fi
+
